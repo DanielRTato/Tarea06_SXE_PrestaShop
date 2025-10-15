@@ -1,9 +1,6 @@
-# Tarea 06
+# Tarea 06 Intalación de un SGE con Docker Compose
 
-## Configuración del archivo ``.yml`` y ``.env``
-
-Archivo ``.yml`` con healthcheck en la base de datos y los demás servicios esperan a que termine, utilizando otro archivo ``.env`` para guardar la información sensible y utilizando
-volúmenes para la persistencia de datos. Y prestashop con instalación automática.
+Archivo ``.yml`` con healthcheck en la base de datos, haciendo que los demás servicios esperen a que esté completamente operativa. Utiliza un archivo .env para guardar la información sensible, volúmenes para mantener la persistencia de datos y una instalación automática de PrestaShop, sin necesidad de pasar por el asistente de instalación.
 `````yaml
 services:
   prestashop:
@@ -12,13 +9,13 @@ services:
     restart: unless-stopped
     depends_on:
       db:
-        condition: service_healthy
+        condition: service_healthy       # Espera a que la base de datos responda
     environment:
       DB_SERVER: ${DB_SERVER}
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWD: ${DB_PASSWD}
-      PS_INSTALL_AUTO: 1
+      PS_INSTALL_AUTO: 1                 # Instala PrestaShop automáticamente
       PS_DOMAIN: localhost:80
       PS_LANGUAGE: es
       PS_COUNTRY: ES
@@ -27,9 +24,9 @@ services:
     ports:
       - ${PRESTASHOP_PORT}:80
     volumes:
-      - psdata:/var/www/html
+      - psdata:/var/www/html            # Volumen para la persistencia de datos
     networks:
-      - prestashop_network
+      - prestashop_network              
 
   db:
     container_name: mysql
@@ -44,12 +41,12 @@ services:
       - dbdata:/var/lib/mysql
     networks:
       - prestashop_network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
+    healthcheck:                # Comprueba que la base de datos está operativa
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]  # Comando que comprueba la conexión
+      interval: 10s                                           # Intervalo entre comprobaciones
+      timeout: 5s                                             # Tiempo máximo de espera por respuesta 
+      retries: 5                                              # Número máximo de intentos
+      start_period: 20s                                       # Tiempo de espera inicial antes de iniciar la verificación
 
   phpmyadmin:
     container_name: phpmyadmin
@@ -57,7 +54,7 @@ services:
     restart: unless-stopped
     depends_on:
       db:
-        condition: service_healthy
+        condition: service_healthy  # Espera también al healthcheck de la base de datos
     environment:
       PMA_HOST: ${PMA_HOST}
       PMA_PORT: ${PMA_PORT}
@@ -67,16 +64,16 @@ services:
     networks:
       - prestashop_network
 
-volumes:
+volumes:                        # Volúmenes para mantener los datos 
   dbdata:
   psdata:
 
-networks:
+networks:                      # Red interna compartida entre los servicios
   prestashop_network:
 
 `````
 ---
-Documento ``.env`` para que docker-compose.yml no contenga algún dado sensible.
+Documento ``.env`` para que el archivo ``docker-compose.yml`` no contenga información sensible ni contraseñas directamente.
 `````shell
 # CONFIGURACIÓN BASE DATOS
 MYSQL_ROOT_PASSWORD=admin
@@ -99,16 +96,7 @@ PMA_ARBITRARY=1
 PRESTASHOP_PORT=8080
 PHPMYADMIN_PORT=8081
 `````
+----
 
-## Healthcheck
-````yaml
-    healthcheck:
-      test: ["CMD","mysqladmin","ping","-h","localhost"] # Comando que se ejecuta
-      interval: 10s # Tiempo de espera entre comprobaciones
-      timeout: 5s # Tiempo de espera de docker por la respuesta del comando
-      retries: 5 # Número máximo de intentos
-````
-
-Captura final
-Como se puede comprobar en esta captura, al abrir prestashop no se abre el asistente de instalación.
+Captura que muestra PrestaShop funcionando sin que aparezca el asistente de instalación y phpMyAdmin con las tablas de PrestaShop
 ![1.PNG](img%2F1.PNG)
