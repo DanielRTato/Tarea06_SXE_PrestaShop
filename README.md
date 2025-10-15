@@ -1,4 +1,4 @@
-# Tarea 06 Intalación de un SGE con Docker Compose
+# Tarea 06 Instalación de un SGE con Docker Compose
 
 Archivo ``.yml`` con healthcheck en la base de datos, haciendo que los demás servicios esperen a que esté completamente operativa. Utiliza un archivo .env para guardar la información sensible, volúmenes para mantener la persistencia de datos y una instalación automática de PrestaShop, sin necesidad de pasar por el asistente de instalación.
 `````yaml
@@ -24,7 +24,7 @@ services:
     ports:
       - ${PRESTASHOP_PORT}:80
     volumes:
-      - psdata:/var/www/html            # Volumen para la persistencia de datos
+      - psdata:/var/www/html                                 # Volumen para la persistencia de datos
     networks:
       - prestashop_network              
 
@@ -41,7 +41,7 @@ services:
       - dbdata:/var/lib/mysql
     networks:
       - prestashop_network
-    healthcheck:                # Comprueba que la base de datos está operativa
+    healthcheck:                                              # Comprueba que la base de datos está operativa
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]  # Comando que comprueba la conexión
       interval: 10s                                           # Intervalo entre comprobaciones
       timeout: 5s                                             # Tiempo máximo de espera por respuesta 
@@ -64,11 +64,11 @@ services:
     networks:
       - prestashop_network
 
-volumes:                        # Volúmenes para mantener los datos 
+volumes:                                                      # Volúmenes para mantener los datos 
   dbdata:
   psdata:
 
-networks:                      # Red interna compartida entre los servicios
+networks:                                                      # Red interna compartida entre los servicios
   prestashop_network:
 
 `````
