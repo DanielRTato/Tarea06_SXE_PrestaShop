@@ -2,6 +2,8 @@
 
 ## Configuración del archivo ``.yml`` y ``.env``
 
+Archivo ``.yml`` con healthcheck en la base de datos y los demás servicios esperan a que termine, utilizando otro archivo ``.env`` para guardar la información sensible y utilizando
+volúmenes para la persistencia de datos. Y prestashop con instalación automática.
 `````yaml
 services:
   prestashop:
@@ -9,15 +11,22 @@ services:
     image: prestashop/prestashop:latest
     restart: unless-stopped
     depends_on:
-       - db
-    ports:
-      - "${PRESTASHOP_PORT}:80"
+      db:
+        condition: service_healthy
     environment:
       DB_SERVER: ${DB_SERVER}
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWD: ${DB_PASSWD}
-    volumes: # Para la persistencia de datos
+      PS_INSTALL_AUTO: 1
+      PS_DOMAIN: localhost:80
+      PS_LANGUAGE: es
+      PS_COUNTRY: ES
+      ADMIN_MAIL: ${ADMIN_MAIL}
+      ADMIN_PASSWD: ${ADMIN_PASSWD}
+    ports:
+      - ${PRESTASHOP_PORT}:80
+    volumes:
       - psdata:/var/www/html
     networks:
       - prestashop_network
@@ -30,18 +39,25 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
-      MYSQL_ PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - dbdata:/var/lib/mysql
     networks:
-    - prestashop_network
+      - prestashop_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin
     container_name: phpmyadmin
+    image: phpmyadmin/phpmyadmin
     restart: unless-stopped
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       PMA_HOST: ${PMA_HOST}
       PMA_PORT: ${PMA_PORT}
@@ -51,12 +67,13 @@ services:
     networks:
       - prestashop_network
 
-volumes: # Para la persistencia de datos
+volumes:
   dbdata:
   psdata:
 
 networks:
   prestashop_network:
+
 `````
 ---
 Documento ``.env`` para que docker-compose.yml no contenga algún dado sensible.
@@ -64,15 +81,13 @@ Documento ``.env`` para que docker-compose.yml no contenga algún dado sensible.
 # CONFIGURACIÓN BASE DATOS
 MYSQL_ROOT_PASSWORD=admin
 MYSQL_DATABASE=prestashop
-MYSQL_USER=root
+MYSQL_USER=psuser
 MYSQL_PASSWORD=admin
-MYSQL_USER=user
-MYSQL_PASSWORD=password
 
 # CONFIGURACIÓN PRESTASHOP
 DB_SERVER=db
 DB_NAME=prestashop
-DB_USER=root
+DB_USER=psuser
 DB_PASSWD=admin
 
 # CONFIGURACIÓN PHPMYADMIN
@@ -93,3 +108,7 @@ PHPMYADMIN_PORT=8081
       timeout: 5s # Tiempo de espera de docker por la respuesta del comando
       retries: 5 # Número máximo de intentos
 ````
+
+Captura final
+Como se puede comprobar en esta captura, al abrir prestashop no se abre el asistente de instalación.
+![1.PNG](img%2F1.PNG)
