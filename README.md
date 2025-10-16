@@ -1,4 +1,8 @@
-# Tarea 06 Instalación de PrestaShop con Docker Compose
+# 🐳 Tarea06 - Instalación de PrestaShop con Docker Compose
+
+> [!NOTE]
+> Imágenes utilizadas: [PrestaShop](https://hub.docker.com/r/prestashop/prestashop/), [MySQL](https://hub.docker.com/_/mysql) y [phpMyAdmin](https://hub.docker.com/_/phpmyadmin)
+
 
 Archivo `docker-compose.yml` con healthcheck en la base de datos, haciendo que los demás servicios esperen a que esté completamente operativa. Utiliza un archivo `.env` para guardar la información sensible, volúmenes para mantener la persistencia de datos y una instalación automática de PrestaShop, sin necesidad de pasar por el asistente de instalación.
 `````yaml
@@ -105,7 +109,7 @@ PHPMYADMIN_PORT=8081
 ---
 
 ### Captura final
-Se muestra *PrestaShop* funcionando directamente sin pasar por el asistente de instalación y *phpMyAdmin* mostrando las tablas
+Se muestra **PrestaShop** funcionando directamente sin pasar por el asistente de instalación y **phpMyAdmin** mostrando las tablas
 de la base de datos prestashop.
 
 ![1.PNG](img%2F1.PNG)
