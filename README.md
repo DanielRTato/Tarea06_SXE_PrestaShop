@@ -1,6 +1,6 @@
-# Tarea 06 Instalación de un SGE con Docker Compose
+# Tarea 06 Instalación de PrestaShop con Docker Compose
 
-Archivo ``.yml`` con healthcheck en la base de datos, haciendo que los demás servicios esperen a que esté completamente operativa. Utiliza un archivo .env para guardar la información sensible, volúmenes para mantener la persistencia de datos y una instalación automática de PrestaShop, sin necesidad de pasar por el asistente de instalación.
+Archivo `docker-compose.yml` con healthcheck en la base de datos, haciendo que los demás servicios esperen a que esté completamente operativa. Utiliza un archivo `.env` para guardar la información sensible, volúmenes para mantener la persistencia de datos y una instalación automática de PrestaShop, sin necesidad de pasar por el asistente de instalación.
 `````yaml
 services:
   prestashop:
@@ -16,7 +16,7 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWD: ${DB_PASSWD}
       PS_INSTALL_AUTO: 1                 # Instala PrestaShop automáticamente
-      PS_DOMAIN: localhost:80
+      PS_DOMAIN: localhost:8080
       PS_LANGUAGE: es
       PS_COUNTRY: ES
       ADMIN_MAIL: ${ADMIN_MAIL}
@@ -73,19 +73,19 @@ networks:                                                      # Red interna com
 
 `````
 ---
-Documento ``.env`` para que el archivo ``docker-compose.yml`` no contenga información sensible ni contraseñas directamente.
+Archivo `.env` para que `docker-compose.yml` no contenga información sensible ni contraseñas directamente.
 `````shell
 # CONFIGURACIÓN BASE DATOS
 MYSQL_ROOT_PASSWORD=admin
 MYSQL_DATABASE=prestashop
 MYSQL_USER=psuser
-MYSQL_PASSWORD=admin
+MYSQL_PASSWORD=pspass
 
 # CONFIGURACIÓN PRESTASHOP
 DB_SERVER=db
 DB_NAME=prestashop
 DB_USER=psuser
-DB_PASSWD=admin
+DB_PASSWD=pspass
 
 # CONFIGURACIÓN PHPMYADMIN
 PMA_HOST=db
@@ -96,7 +96,16 @@ PMA_ARBITRARY=1
 PRESTASHOP_PORT=8080
 PHPMYADMIN_PORT=8081
 `````
-----
 
-Captura que muestra PrestaShop funcionando sin que aparezca el asistente de instalación y phpMyAdmin con las tablas de PrestaShop
+----
+### Comandos utilizados:
+- `docker compose up` Inicia los contenedores (sin `-d` para ver los logs).
+- `docker compose down -v` Detiene y elimina los contenedores y volúmenes.
+
+---
+
+### Captura final
+Se muestra *PrestaShop* funcionando directamente sin pasar por el asistente de instalación y *phpMyAdmin* mostrando las tablas
+de la base de datos prestashop.
+
 ![1.PNG](img%2F1.PNG)
